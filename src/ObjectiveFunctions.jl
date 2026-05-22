@@ -1,3 +1,7 @@
+using FiniteDiff
+using Statistics
+using Distributions
+using LinearAlgebra
 
 max_value(data::ExperimentData) = maximum(data)
 

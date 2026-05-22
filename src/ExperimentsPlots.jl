@@ -53,31 +53,31 @@ function plot_experiment_legend!(; color=:black)
 end
 
 function plot_experiment!(model, data::OneCycleTest, labelfn=d->"")
-  σ_values = evaluate_stress(model, data.Δt, data.θ, data.λ)
+  σ_values = evaluate_stress(model, data.Δt, data.λ)
   label = labelfn(data)
   plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
 function plot_experiment!(model, data::CreepTest, labelfn=d->"")
   λ = fill(data.λ_max, size(data.t))
-  σ_values = evaluate_stress(model, data.Δt, data.θ, λ)
+  σ_values = evaluate_stress(model, data.Δt, λ)
   label = labelfn(data)
   plot!(data.t./3600 .+ creep_time_offset[], [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
   creep_time_offset[] += 0.5
 end
 
 function plot_experiment!(model, data::QuasiStaticTest)
-  σ_values = evaluate_stress(model, data.θ, data.λ)
+  σ_values = evaluate_stress(model, data.λ)
   plot!(data.λ, [σ_values, data.σ]./1e3, label=["Model" "Experiment"], typ=[:path :scatter], color_palette=colors2)
 end
 
 function plot_confidence_bands!(model, random_models, data; alpha=0.05)
   for rand_model in random_models
-    σ_sim = evaluate_stress(rand_model, data.Δt, data.θ, data.λ)
+    σ_sim = evaluate_stress(rand_model, data.Δt, data.λ)
     plot!(data.λ, σ_sim./1e3, color=c1, alpha=alpha, lw=1, label="")
   end
 
-  σ_opt = evaluate_stress(model, data.Δt, data.θ, data.λ)
+  σ_opt = evaluate_stress(model, data.Δt, data.λ)
   plot!(data.λ, σ_opt./1e3, color=c1, lw=2, label="Model")
   
   scatter!(data.λ, data.σ./1e3, label="Experiment", color=:black, markerstrokewidth=0)

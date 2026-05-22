@@ -28,10 +28,13 @@ function OneCycleTest(df, weight=1.0)
   # Sanity check
   @assert length(raw_times) == length(raw_λ) == length(raw_σ)
   raw_times .-= raw_times[1]
+  raw_λ .+= 1.0 # FIXME: Source data is inconsistent
 
   # Get the peak stress to copmute the loading rate
   σ_max, max_pos = findmax(raw_σ)
   vel = raw_λ[max_pos-1] / raw_times[max_pos-1]
+  vel_tol = 0.005
+  vel = round(vel / vel_tol) * vel_tol
 
   # Remove the near zero/negative stresses after unloading
   last_measure = findlast(σ -> σ > 0.1*σ_max, raw_σ)
@@ -73,6 +76,7 @@ function CreepTest(df, weight=1.0)
   # Sanity check
   @assert length(raw_times) == length(raw_λ) == length(raw_σ)
   raw_times .-= raw_times[1]
+  raw_λ .+= 1.0 # FIXME: Source data is inconsistent
 
   # Get the maximum stress and remove near-zero measures
   σ_max = maximum(raw_σ)
@@ -109,7 +113,21 @@ function QuasiStaticTest(df, weight=1.0)
   raw_σ = df["P"]
 
   @assert length(raw_λ) == length(raw_σ)
+  raw_λ .+= 1.0 # FIXME: Source data is inconsistent
 
+  # Get the maximum stress and remove near-zero measures
+  σ_max = maximum(raw_σ)
+  last_measure = findlast(σ -> σ > 0.1*σ_max, raw_σ)
+  last_λ = raw_λ[last_measure]
+
+  # Generate a new time series and interpolate data
+  npoints = 100
+  λ = range(0, last_λ, length=npoints)
+  control_points = 10
+  interp = BSplineApprox(raw_σ, raw_λ, 3, control_points)
+  σ = interp(λ)
+
+  # Generate the new struct
   QuasiStaticTest(raw_λ, raw_σ, weight)
 end
 
@@ -122,12 +140,14 @@ npoints(test::CreepTest) = length(test.t)
 
 npoints(test::QuasiStaticTest) = length(test.λ)
 
+npoints(tests::Vector{<:ExperimentData}) = sum(npoints, tests)
+
 Base.maximum(test::ExperimentData) = maximum(test.σ)
 
 function Base.print(data::Vector{OneCycleTest})
   println("Set of $(length(data)) $(OneCycleTest)")
-  println("__λ__|___v__|__w_")
-  foreach(r -> @printf(" %.1f | %.2f | %.1f\n", r.λ_max, r.v, r.weight), data)
+  println("__λ__|___v___|__w_")
+  foreach(r -> @printf(" %.1f | %.3f | %.1f\n", r.λ_max, r.v, r.weight), data)
 end
 
 function Base.print(data::Vector{CreepTest})
