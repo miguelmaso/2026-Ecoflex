@@ -1,4 +1,5 @@
 using DataInterpolations
+using Printf
 
 abstract type ExperimentData end
 
@@ -115,7 +116,7 @@ end
 #endregion
 #region Functions
 
-npoints(test::LoadingTest) = length(test.λ)
+npoints(test::OneCycleTest) = length(test.λ)
 
 npoints(test::CreepTest) = length(test.t)
 
