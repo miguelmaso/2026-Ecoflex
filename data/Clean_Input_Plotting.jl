@@ -1,8 +1,7 @@
 using Plots
 using JLD2
 
-# Introduce the location of your file
-Data = load("G:/My Drive/Temp/3D printing DEAs/Tensile data/GoodSample2&1_Cyclic_Relax_Quasi_TestData.jld2")
+Data = load(abspath(dirname(@__FILE__),"20260521/GoodSample2&1_Cyclic_Relax_Quasi_TestData.jld2"))
 
 Data = Data["Test_Data"]
 test_list = [3,4]
@@ -17,6 +16,10 @@ for test in test_list
     end 
 end
 display(p)
+
+e1 = Data["Test = 3 ; λ_max = 20 ; v = 0.01"]
+[keys(e1)...]
+
 
 p = plot()
 P_relax = []

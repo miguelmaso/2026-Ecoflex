@@ -1,0 +1,54 @@
+# Manifest is machine dependant
+Manifest.toml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Julia artifacts and caches
+.julia/
+.julia_history
+*.ji
+*.ji.*
+*.jl.cov
+coverage/
+coverage.*
+*.coverage
+
+# Build / dependency artifacts
+deps/
+artifacts/
+deps.build/
+build/
+
+# Binary objects
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs and temporary files
+logs/
+*.log
+tmp/
+temp/
+
+# Large datasets (optional - remove if you want to track dataset files)
+data/
+
+# OS generated files
+ehthumbs.db
+Icon?
