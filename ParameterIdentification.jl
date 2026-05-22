@@ -9,6 +9,7 @@ using Metaheuristics, OptimizationMetaheuristics
 include("src/Calibration.jl")
 # using .Calibration
 
+
 ## Load data
 
 data = begin
@@ -33,6 +34,7 @@ for (k,v) in data
   end
 end
 
+
 ## Data inspection
 
 println(onecycle_tests)
@@ -40,7 +42,10 @@ println(creep_tests)
 println(qs_tests)
 
 test_1 = getfirst(t -> t.v≈0.025 && t.λ_max≈1.6, onecycle_tests)
-plot(test_1.λ, test_1.σ)
+display(plot(test_1.λ, test_1.σ, label=nothing))
+test_2 = qs_tests[1]
+display(plot(test_2.λ, test_2.σ, label=false))
+
 
 ## Step 1: Hyperelastic characterization
 
@@ -57,6 +62,7 @@ opt_prob = OptimizationProblem(opt_func, opt_long.u, qs_tests)
 opt_long = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
 sol_long = opt_long.u
 
+
 ## Visualization of the long-term component
 
 long_term = build_long(sol_long...)
@@ -72,7 +78,7 @@ display(p);
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long...), build_branches(p...)...)
-n_branches = 3
+n_branches = 2
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -1.0] for _ in 1:n_branches)  # Lower search limits

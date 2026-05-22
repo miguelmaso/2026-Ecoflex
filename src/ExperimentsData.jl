@@ -1,4 +1,5 @@
 using DataInterpolations
+using Loess
 using Printf
 
 abstract type ExperimentData end
@@ -115,20 +116,27 @@ function QuasiStaticTest(df, weight=1.0)
   @assert length(raw_λ) == length(raw_σ)
   raw_λ .+= 1.0 # FIXME: Source data is inconsistent
 
-  # Get the maximum stress and remove near-zero measures
-  σ_max = maximum(raw_σ)
-  last_measure = findlast(σ -> σ > 0.1*σ_max, raw_σ)
-  last_λ = raw_λ[last_measure]
+  # Get only the loading branch
+  i_max = argmax(raw_σ)
+  raw_λ = raw_λ[1:i_max]
+  raw_σ = raw_σ[1:i_max]
+  λ_max = raw_λ[end]
+
+  # remove noisy non-increasing stretch
+  increasing_indices = [1; findall(diff(raw_λ) .> 1e-6) .+ 1]
+  raw_λ = raw_λ[increasing_indices]
+  raw_σ = raw_σ[increasing_indices]
+
+  # Create a filter
+  interp = loess(raw_λ, raw_σ, span=0.5)
 
   # Generate a new time series and interpolate data
   npoints = 100
-  λ = range(0, last_λ, length=npoints)
-  control_points = 10
-  interp = BSplineApprox(raw_σ, raw_λ, 3, control_points)
-  σ = interp(λ)
+  λ = range(1, λ_max, length=npoints)
+  σ = predict(interp, λ)
 
   # Generate the new struct
-  QuasiStaticTest(raw_λ, raw_σ, weight)
+  QuasiStaticTest(λ, σ, weight)
 end
 
 #endregion
