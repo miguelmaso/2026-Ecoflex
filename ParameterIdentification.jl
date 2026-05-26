@@ -79,7 +79,24 @@ build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, �
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long...), build_branches(p...)...)
 n_branches = 2
-pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
+pn = reduce(vcat, ["μ$i", "logτ$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -1.0] for _ in 1:n_branches)  # Lower search limits
 ub = reduce(vcat, [  1e5,   4.0] for _ in 1:n_branches)  # Upper search limits
+
+opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, onecycle_tests, lb=lb, ub=ub)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
+opt_prob = OptimizationProblem(opt_func, opt_visco.u, onecycle_tests)
+opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
+sol_visco = opt_visco.u
+
+
+## Visualization of the long-term component
+
+model = build_visco(sol_visco...)
+r2 = stats(build_visco, sol_visco, onecycle_tests, pn)
+p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
+plot_experiment!(model, getfirst(r -> r.λ_max ≈ 1.4, onecycle_tests))
+annotate_r2!(r2, 0.7)
+display(p);
