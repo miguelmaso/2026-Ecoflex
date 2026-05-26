@@ -2,9 +2,9 @@
 using Plots, Printf
 import Plots: mm
 
-pgfplotsx() # Enable LaTeX fonts for labels
-            # This backend is slow, use GR() (the default) for a faster rendering
-            # PgfPlots backend has several compatibility issues and depends on the LaTeX installation
+# pgfplotsx() # Enable LaTeX fonts for labels
+#             # This backend is slow, use GR() (the default) for a faster rendering
+#             # PgfPlots backend has several compatibility issues and depends on the LaTeX installation
 
 # See the available palettes in:
 # https://juliagraphics.github.io/ColorSchemes.jl/stable/catalogue/
