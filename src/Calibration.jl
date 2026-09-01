@@ -14,10 +14,12 @@
 # export plot_experiments
 # export plot_confidence_bands!
 # export annotate_r2!
-
+include("RawDataIngestion.jl")
+include("DataFiltering.jl")
 include("ExperimentsData.jl")
 include("ConstitutiveModeling.jl")
 include("ObjectiveFunctions.jl")
 include("ExperimentsPlots.jl")
+
 
 # end

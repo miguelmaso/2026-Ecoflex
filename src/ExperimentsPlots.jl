@@ -35,7 +35,7 @@ const diverging_rb = cgrad([reverse(palette(:blues,50))...; palette(:OrRd,50)...
 
 const c1 = the_palette[1]
 
-vel_label(data) = @sprintf("%.2f/s", data.v)
+vel_label(data) = @sprintf("%.3f/s", data.v)
 temp_label(data) = @sprintf("%2.0fºC", data.θ-K0)
 stretch_label(data) = @sprintf("%3.0f%%", 100*(data.λ_max-1))
 voltage_label(data) = @sprintf("%4dV", data.V)

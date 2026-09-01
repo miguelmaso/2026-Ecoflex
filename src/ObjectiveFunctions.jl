@@ -9,7 +9,7 @@ max_value(data::ExperimentData) = maximum(data)
 function loss(model::PhysicalModel, data::ExperimentData)
   y_data, y_pred = experiment_prediction(model, data)
   m = max_value(data)
-  s2 = zero(eltype(y_pred))
+    s2 = zero(eltype(y_pred))
   @inbounds for i in eachindex(y_data)
       s2 += abs2((y_pred[i] - y_data[i]) / m)
   end
@@ -41,11 +41,33 @@ function experiment_prediction(model::PhysicalModel, data::OneCycleTest)
   return y_true, y_pred
 end
 
+function experiment_prediction(model::PhysicalModel, data::EquiBiaxialOneCycle)
+  y_true = vcat(data.σ_1,data.σ_2)
+  y_pred_1, y_pred_2 = evaluate_stress(model, data.Δt, data.λ_1, data.λ_2)
+  y_pred = vcat(y_pred_1, y_pred_2)
+  return y_true, y_pred
+end
+
+function experiment_prediction(model::PhysicalModel, data::EquiBiaxialRelaxTest)
+  y_true = vcat(data.σ_1,data.σ_1)
+  y_pred_1, y_pred_2 = evaluate_stress(model, data.Δt, data.λ_1, data.λ_2)
+  y_pred = vcat(y_pred_1, y_pred_2)
+  return y_true, y_pred
+end
+
 function experiment_prediction(model::PhysicalModel, data::CreepTest)
   y_true = data.σ
   x_data = fill(data.λ_max, size(data.t))
   y_pred = evaluate_stress(model, data.Δt, x_data)
   return y_true, y_pred
+end
+
+function experiment_prediction(model::PhysicalModel, data::EquiBiaxialRelaxTest)
+  y_true = vcat(data.σ_1_1,data.σ_2_1,data.σ_1_2,data.σ_2_2)
+  y_pred_1, ypred_2, y_pred_3, y_pred_4 = evaluate_stress(model,data.Δt_1,data.v,data.npoints_load,data.Δt_2,data.λ_max,data.t_max)
+  y_pred = vcat(y_pred_1, ypred_2, y_pred_3, y_pred_4)
+  @assert length(y_true)==length(y_pred)
+  return y_true,y_pred
 end
 
 function experiment_prediction(model::PhysicalModel, data::QuasiStaticTest)
@@ -103,6 +125,14 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
     rel_e = abs(abs_e / params[i])
     sens = H[i,i] * params[i]^2 / sse_val
     @printf(io, "%-5s | % 8.2g ± %7.2g (%5.1f%%) | %5.1f\n", names[i], params[i], abs_e, 100rel_e, sens)
+  end
+  println("")
+  for i in eachindex(params)
+    abs_e = t_crit * std_errs[i]
+    rel_e = abs(abs_e / params[i])
+    sens = H[i,i] * params[i]^2 / sse_val
+    @printf("%-5s    &  % 8.4g \\(\\pm\\) %.1e (  %.1f\\%%) & %.1f\n", 
+        names[i], params[i], abs_e, 100rel_e, sens)
   end
   return r_squared(model, data)
 end

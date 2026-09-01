@@ -42,7 +42,7 @@ println(creep_tests)
 println(qs_tests)
 
 test_1 = getfirst(t -> t.v≈0.025 && t.λ_max≈1.6, onecycle_tests)
-display(plot(test_1.λ, test_1.σ, label=nothing))
+display(plot(test_1.λ, test_1.σ, label=nothing, marker=2))
 test_2 = qs_tests[1]
 display(plot(test_2.λ, test_2.σ, label=false))
 
@@ -97,6 +97,6 @@ sol_visco = opt_visco.u
 model = build_visco(sol_visco...)
 r2 = stats(build_visco, sol_visco, onecycle_tests, pn)
 p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
-plot_experiments(model, filter(r -> r.λ_max ≈ 1.4, onecycle_tests)[[1,3,5]], stretch_label, vel_label, "Stretch [-]", "Stress [kPa]")
-annotate_r2!(r2, 0.7)
+plot_experiments(model, filter(r -> r.λ_max ≈ 1.4, onecycle_tests), stretch_label, vel_label, "Stretch [-]", "Stress [kPa]")
+annotate_r2!(r2, 0.5)
 display(p);
